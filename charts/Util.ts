@@ -685,16 +685,17 @@ export function parseFloatOrUndefined(s: string | undefined) {
 }
 
 export function computeRollingAverage(
-    numbers: (number | undefined)[],
+    numbers: (number | undefined | null)[],
     windowSize: number,
     align: "right" | "center" = "right"
 ) {
-    const result: (number | undefined)[] = []
+    const result: (number | undefined | null)[] = []
 
     for (let valueIndex = 0; valueIndex < numbers.length; valueIndex++) {
         // If a value is undefined in the original input, keep it undefined in the output
-        if (numbers[valueIndex] === undefined) {
-            result[valueIndex] = undefined
+        const currentVal = numbers[valueIndex]
+        if (currentVal === undefined || currentVal === null) {
+            result[valueIndex] = currentVal
             continue
         }
 
@@ -718,8 +719,8 @@ export function computeRollingAverage(
             windowIndex++
         ) {
             const value = numbers[windowIndex]
-            if (value !== undefined) {
-                sum += value
+            if (value !== undefined && value !== null) {
+                sum += value!
                 count++
             }
         }
@@ -748,7 +749,7 @@ export function insertMissingValuePlaceholders(
         map.set(year, index)
     })
     while (year <= endYear) {
-        filledRange.push(values[map.get(year)])
+        filledRange.push(map.has(year) ? values[map.get(year)] : null)
         year++
     }
     return filledRange
